@@ -20,20 +20,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mypersonalorganizerv2.ui.components.CustomTextField
 import com.example.mypersonalorganizerv2.ui.components.PrimaryButton
 import com.example.mypersonalorganizerv2.ui.theme.PrimaryBlue
+import com.example.mypersonalorganizerv2.viewmodel.AuthViewModel
 
+// TELA DE CADASTRO (criar conta).
+// Também não usa o MainScaffold, então NÃO tem menu (requisito do trabalho).
+// Os campos ficam guardados no AuthViewModel, que valida e salva no banco.
 @Composable
 fun RegisterScreen(
-    onRegisterClick: () -> Unit,
-    onBackToLoginClick: () -> Unit
+    onRegisterSuccess: () -> Unit,       // chamado quando a conta é criada
+    onBackToLoginClick: () -> Unit,      // volta para o login
+    viewModel: AuthViewModel = viewModel()
 ) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    // Controla se a senha aparece ou fica escondida
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
@@ -47,20 +49,21 @@ fun RegisterScreen(
         Text(text = "Criar conta", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue)
         Spacer(modifier = Modifier.height(32.dp))
 
-        CustomTextField(value = name, onValueChange = { name = it }, label = "Nome completo", placeholder = "digite seu nome", leadingIcon = Icons.Default.Person)
+        // Cada campo lê e grava o valor direto no ViewModel
+        CustomTextField(value = viewModel.name, onValueChange = { viewModel.name = it; viewModel.clearError() }, label = "Nome completo", placeholder = "digite seu nome", leadingIcon = Icons.Default.Person)
         Spacer(modifier = Modifier.height(16.dp))
 
-        CustomTextField(value = email, onValueChange = { email = it }, label = "E-mail", placeholder = "digite seu e-mail", leadingIcon = Icons.Default.Email)
+        CustomTextField(value = viewModel.email, onValueChange = { viewModel.email = it; viewModel.clearError() }, label = "E-mail", placeholder = "digite seu e-mail", leadingIcon = Icons.Default.Email)
         Spacer(modifier = Modifier.height(16.dp))
 
-        CustomTextField(value = phone, onValueChange = { phone = it }, label = "Telefone", placeholder = "(00) 00000-0000", leadingIcon = Icons.Default.Phone)
+        CustomTextField(value = viewModel.phone, onValueChange = { viewModel.phone = it }, label = "Telefone", placeholder = "(00) 00000-0000", leadingIcon = Icons.Default.Phone)
         Spacer(modifier = Modifier.height(16.dp))
 
-        CustomTextField(value = birthDate, onValueChange = { birthDate = it }, label = "Data de nascimento", placeholder = "dd/mm/aaaa", leadingIcon = Icons.Default.CalendarToday)
+        CustomTextField(value = viewModel.birthDate, onValueChange = { viewModel.birthDate = it }, label = "Data de nascimento", placeholder = "dd/mm/aaaa", leadingIcon = Icons.Default.CalendarToday)
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            value = password, onValueChange = { password = it }, label = "Senha", placeholder = "••••••••",
+            value = viewModel.password, onValueChange = { viewModel.password = it; viewModel.clearError() }, label = "Senha", placeholder = "••••••••",
             leadingIcon = Icons.Default.Lock,
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -69,9 +72,23 @@ fun RegisterScreen(
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
         )
+
+        // Mostra o erro de validação (ex.: "Já existe uma conta com este e-mail.")
+        viewModel.errorMessage?.let { error ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.align(Alignment.Start)
+            )
+        }
         Spacer(modifier = Modifier.height(32.dp))
 
-        PrimaryButton(text = "Cadastrar", onClick = onRegisterClick)
+        // Botão CADASTRAR: o ViewModel valida e salva; se der certo, volta para o login
+        PrimaryButton(text = "Cadastrar", onClick = {
+            if (viewModel.register()) onRegisterSuccess()
+        })
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {

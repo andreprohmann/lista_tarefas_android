@@ -20,32 +20,30 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mypersonalorganizerv2.ui.components.CustomTextField
 import com.example.mypersonalorganizerv2.ui.components.PrimaryButton
 import com.example.mypersonalorganizerv2.ui.theme.PrimaryBlue
+import com.example.mypersonalorganizerv2.viewmodel.AuthViewModel
 
+// TELA DE LOGIN.
+// Não usa o MainScaffold, por isso NÃO tem menu (requisito do trabalho).
+// A tela só mostra os campos; quem confere o login é o AuthViewModel.
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit,
+    onLoginSuccess: () -> Unit,          // chamado quando o login dá certo
     onForgotPasswordClick: () -> Unit,
-    onCreateAccountClick: () -> Unit
+    onCreateAccountClick: () -> Unit,    // abre a tela de cadastro
+    viewModel: AuthViewModel = viewModel() // viewModel() cria (ou reaproveita) o ViewModel
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    // Controla se a senha aparece ou fica escondida (••••)
     var passwordVisible by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    fun validateAndLogin() {
-        val trimmedUser = email.trim()
-        val isValidUser = trimmedUser.equals("Admin", ignoreCase = true) ||
-                trimmedUser.equals("admin@admin.com", ignoreCase = true)
-        val isValidPassword = password == "admin"
-
-        if (isValidUser && isValidPassword) {
-            errorMessage = null
-            onLoginClick()
-        } else {
-            errorMessage = "Usuário ou senha incorretos."
+    // LaunchedEffect = "assim que a tela abrir, faça isso".
+    // Se já existe uma sessão salva (usuário não clicou em Sair), pula direto para o app.
+    LaunchedEffect(Unit) {
+        if (viewModel.isLoggedIn()) {
+            onLoginSuccess()
         }
     }
 
@@ -72,45 +70,48 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(40.dp))
 
+        // Campo de e-mail: o valor fica guardado no ViewModel
         CustomTextField(
-            value = email,
+            value = viewModel.email,
             onValueChange = {
-                email = it
-                if (errorMessage != null) errorMessage = null
+                viewModel.email = it
+                viewModel.clearError()
             },
-            label = "E-mail ou Usuário",
-            placeholder = "digite seu e-mail ou Admin",
+            label = "E-mail",
+            placeholder = "digite seu e-mail",
             leadingIcon = Icons.Default.Email,
-            isError = errorMessage != null
+            isError = viewModel.errorMessage != null
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de senha, com o "olho" para mostrar/esconder
         CustomTextField(
-            value = password,
+            value = viewModel.password,
             onValueChange = {
-                password = it
-                if (errorMessage != null) errorMessage = null
+                viewModel.password = it
+                viewModel.clearError()
             },
             label = "Senha",
             placeholder = "••••••••",
             leadingIcon = Icons.Default.Lock,
-          //  trailingIcon = {
-            //    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-              //      Icon(
-                //        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                 //       contentDescription = null
-                  //  )
-                //}
-            //},
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = null
+                    )
+                }
+            },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            isError = errorMessage != null
+            isError = viewModel.errorMessage != null
         )
 
-        if (errorMessage != null) {
+        // Se o ViewModel tiver uma mensagem de erro, mostra em vermelho
+        viewModel.errorMessage?.let { error ->
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = errorMessage!!,
+                text = error,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.align(Alignment.Start)
@@ -119,7 +120,10 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        PrimaryButton(text = "Entrar", onClick = { validateAndLogin() })
+        // Botão ENTRAR: pede ao ViewModel para fazer o login; se der certo, abre o app
+        PrimaryButton(text = "Entrar", onClick = {
+            if (viewModel.login()) onLoginSuccess()
+        })
 
         TextButton(onClick = onForgotPasswordClick) { Text("Esqueci minha senha", color = PrimaryBlue) }
 

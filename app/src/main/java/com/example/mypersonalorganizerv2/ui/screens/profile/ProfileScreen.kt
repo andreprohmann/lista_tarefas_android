@@ -22,24 +22,30 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mypersonalorganizerv2.navigation.Screen
 import com.example.mypersonalorganizerv2.ui.components.CustomTextField
 import com.example.mypersonalorganizerv2.ui.components.MainScaffold
 import com.example.mypersonalorganizerv2.ui.components.PrimaryButton
 import com.example.mypersonalorganizerv2.ui.theme.PrimaryBlue
+import com.example.mypersonalorganizerv2.viewmodel.ProfileViewModel
 
+// TELA DE PERFIL: mostra e altera os dados do usuário logado.
+// Usa o MainScaffold, então TEM menu.
 @Composable
 fun ProfileScreen(
     onNavigate: (String) -> Unit,
     onLogout: () -> Unit,
-    onSaveClick: () -> Unit
+    viewModel: ProfileViewModel = viewModel()
 ) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
+    // Preferências de notificação (só visuais, não são salvas no banco)
     var emailNotifications by remember { mutableStateOf(true) }
     var smsNotifications by remember { mutableStateOf(true) }
+
+    // LaunchedEffect: ao abrir a tela, busca no banco os dados do usuário logado
+    LaunchedEffect(Unit) {
+        viewModel.loadUser()
+    }
 
     MainScaffold(
         title = "Meu perfil",
@@ -62,13 +68,13 @@ fun ProfileScreen(
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
-            CustomTextField(value = name, onValueChange = { name = it }, label = "Nome completo", placeholder = "digite seu nome", leadingIcon = Icons.Default.Person)
+            CustomTextField(value = viewModel.name, onValueChange = { viewModel.name = it; viewModel.clearMessage() }, label = "Nome completo", placeholder = "digite seu nome", leadingIcon = Icons.Default.Person)
             Spacer(modifier = Modifier.height(16.dp))
-            CustomTextField(value = email, onValueChange = { email = it }, label = "E-mail", placeholder = "digite seu e-mail", leadingIcon = Icons.Default.Email)
+            CustomTextField(value = viewModel.email, onValueChange = { viewModel.email = it; viewModel.clearMessage() }, label = "E-mail", placeholder = "digite seu e-mail", leadingIcon = Icons.Default.Email)
             Spacer(modifier = Modifier.height(16.dp))
-            CustomTextField(value = phone, onValueChange = { phone = it }, label = "Telefone", placeholder = "(00) 00000-0000", leadingIcon = Icons.Default.Phone)
+            CustomTextField(value = viewModel.phone, onValueChange = { viewModel.phone = it; viewModel.clearMessage() }, label = "Telefone", placeholder = "(00) 00000-0000", leadingIcon = Icons.Default.Phone)
             Spacer(modifier = Modifier.height(16.dp))
-            CustomTextField(value = address, onValueChange = { address = it }, label = "Endereço", placeholder = "rua, número, bairro", leadingIcon = Icons.Default.LocationOn)
+            CustomTextField(value = viewModel.address, onValueChange = { viewModel.address = it; viewModel.clearMessage() }, label = "Endereço", placeholder = "rua, número, bairro", leadingIcon = Icons.Default.LocationOn)
             Spacer(modifier = Modifier.height(32.dp))
             Text("Preferências de notificação", modifier = Modifier.fillMaxWidth(), fontWeight = FontWeight.Bold)
             Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = Color.White), border = BorderStroke(1.dp, Color.LightGray)) {
@@ -88,8 +94,18 @@ fun ProfileScreen(
                     }
                 }
             }
+            // Mensagem após salvar: azul = sucesso, vermelho = erro
+            viewModel.message?.let { message ->
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = message,
+                    color = if (viewModel.isError) MaterialTheme.colorScheme.error else PrimaryBlue,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             Spacer(modifier = Modifier.height(32.dp))
-            PrimaryButton(text = "Salvar alterações", onClick = onSaveClick)
+            // Botão SALVAR: o ViewModel valida e atualiza o usuário no banco
+            PrimaryButton(text = "Salvar alterações", onClick = { viewModel.saveUser() })
         }
     }
 }
