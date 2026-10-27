@@ -1,0 +1,71 @@
+# =====================================================================
+# .gitignore — Projeto Android (Kotlin + Jetpack Compose + Gradle)
+# Tudo que está listado aqui NÃO vai para o Git/GitHub.
+# São arquivos gerados automaticamente ou que só valem para a sua máquina.
+# =====================================================================
+
+# ---------- Gradle (ferramenta que compila o projeto) ----------
+# Pastas criadas a cada build — podem ser recriadas a qualquer momento
+.gradle/
+build/
+**/build/
+# O wrapper do Gradle PRECISA ir para o Git (permite compilar em outra máquina)
+!gradle/wrapper/gradle-wrapper.jar
+
+# ---------- Kotlin ----------
+# Cache do compilador Kotlin
+.kotlin/
+*.class
+*.kotlin_module
+
+# ---------- Configuração local ----------
+# Guarda o caminho do Android SDK no SEU computador (é diferente em cada máquina)
+local.properties
+
+# ---------- Android Studio / IntelliJ ----------
+# Configurações pessoais da IDE (layout de janelas, caches, dispositivos...)
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+captures/
+.externalNativeBuild/
+.cxx/
+.navigation/
+
+# ---------- Arquivos gerados pelo Android ----------
+# APK/AAB = o app compilado pronto para instalar
+*.apk
+*.aab
+*.ap_
+*.dex
+output.json
+output-metadata.json
+
+# ---------- Assinatura do app (NUNCA enviar — são chaves secretas) ----------
+*.jks
+*.keystore
+keystore.properties
+
+# ---------- Logs e dumps de memória ----------
+# .hprof = "foto" da memória gerada quando o Java/Android Studio trava.
+# Pode ter centenas de MB e o GitHub recusa arquivos acima de 100 MB.
+*.hprof
+*.log
+
+# ---------- Banco de dados SQLite local ----------
+# O banco é criado no celular pelo app; cópias locais não devem ir para o Git
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# ---------- Backups locais ----------
+app/src.zip
+
+# ---------- Sistema operacional / editores ----------
+.DS_Store
+Thumbs.db
+*~
+*.swp
