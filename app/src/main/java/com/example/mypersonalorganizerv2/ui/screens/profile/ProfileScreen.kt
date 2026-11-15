@@ -1,15 +1,12 @@
 package com.example.mypersonalorganizerv2.ui.screens.profile
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -18,14 +15,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mypersonalorganizerv2.navigation.Screen
+import com.example.mypersonalorganizerv2.navigation.Profile
 import com.example.mypersonalorganizerv2.ui.components.CustomTextField
 import com.example.mypersonalorganizerv2.ui.components.MainScaffold
+import com.example.mypersonalorganizerv2.ui.components.PhotoPicker
 import com.example.mypersonalorganizerv2.ui.components.PrimaryButton
 import com.example.mypersonalorganizerv2.ui.theme.PrimaryBlue
 import com.example.mypersonalorganizerv2.viewmodel.ProfileViewModel
@@ -34,7 +31,7 @@ import com.example.mypersonalorganizerv2.viewmodel.ProfileViewModel
 // Usa o MainScaffold, então TEM menu.
 @Composable
 fun ProfileScreen(
-    onNavigate: (String) -> Unit,
+    onNavigate: (Any) -> Unit,
     onLogout: () -> Unit,
     viewModel: ProfileViewModel = viewModel()
 ) {
@@ -43,13 +40,13 @@ fun ProfileScreen(
     var smsNotifications by remember { mutableStateOf(true) }
 
     // LaunchedEffect: ao abrir a tela, busca no banco os dados do usuário logado
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.userId) {
         viewModel.loadUser()
     }
 
     MainScaffold(
         title = "Meu perfil",
-        currentRoute = Screen.Profile.route,
+        currentRoute = Profile,
         onNavigate = onNavigate,
         onLogout = onLogout
     ) { innerPadding ->
@@ -61,12 +58,8 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(modifier = Modifier.size(120.dp).clip(CircleShape).background(Color(0xFFF0F0F0)), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(80.dp), tint = Color.LightGray)
-                Box(modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp).size(32.dp).clip(CircleShape).background(PrimaryBlue), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                }
-            }
+            // Foto do perfil: ao tocar, abre a GALERIA do celular (recurso nativo)
+            PhotoPicker(photoPath = viewModel.photo, onImagePicked = viewModel::onPhotoPicked)
             Spacer(modifier = Modifier.height(32.dp))
             CustomTextField(value = viewModel.name, onValueChange = { viewModel.name = it; viewModel.clearMessage() }, label = "Nome completo", placeholder = "digite seu nome", leadingIcon = Icons.Default.Person)
             Spacer(modifier = Modifier.height(16.dp))

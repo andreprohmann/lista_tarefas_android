@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mypersonalorganizerv2.model.Task
-import com.example.mypersonalorganizerv2.navigation.Screen
+import com.example.mypersonalorganizerv2.navigation.TaskList
 import com.example.mypersonalorganizerv2.ui.components.DeleteConfirmDialog
 import com.example.mypersonalorganizerv2.ui.components.EmptyState
 import com.example.mypersonalorganizerv2.ui.components.MainScaffold
@@ -29,7 +29,7 @@ import com.example.mypersonalorganizerv2.viewmodel.TaskViewModel
 // Usa o MainScaffold, então TEM menu.
 @Composable
 fun TaskListScreen(
-    onNavigate: (String) -> Unit,   // navegação do menu
+    onNavigate: (Any) -> Unit,   // navegação do menu
     onLogout: () -> Unit,           // botão Sair
     onAddTask: () -> Unit,          // botão "+" (nova tarefa)
     onEditTask: (Long) -> Unit,     // abrir uma tarefa para editar
@@ -40,13 +40,13 @@ fun TaskListScreen(
 
     // LaunchedEffect: sempre que a tela abre, busca as tarefas no banco.
     // Por isso, ao voltar do formulário, a lista já aparece atualizada.
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.userId) {
         viewModel.loadTasks()
     }
 
     MainScaffold(
         title = "Minhas tarefas",
-        currentRoute = Screen.TaskList.route,
+        currentRoute = TaskList,
         onNavigate = onNavigate,
         onLogout = onLogout,
         // Botão redondo "+" no canto da tela: cria uma nova tarefa

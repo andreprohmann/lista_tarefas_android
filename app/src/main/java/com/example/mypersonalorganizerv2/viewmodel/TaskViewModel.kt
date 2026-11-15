@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import com.example.mypersonalorganizerv2.data.CategoryDao
 import com.example.mypersonalorganizerv2.data.DatabaseHelper
 import com.example.mypersonalorganizerv2.data.SessionManager
 import com.example.mypersonalorganizerv2.data.TaskDao
@@ -17,7 +18,12 @@ import com.example.mypersonalorganizerv2.model.Task
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val taskDao = TaskDao(DatabaseHelper(application)) // acesso à tabela de tarefas
+    private val categoryDao = CategoryDao(DatabaseHelper(application)) // categorias do campo "Categoria"
     private val sessionManager = SessionManager(application)  // para saber quem está logado
+
+    // Id do usuário logado: as telas usam como chave do LaunchedEffect,
+    // pois os dados mostrados dependem de QUEM está logado.
+    val userId = sessionManager.getUserId()
 
     // Lista de tarefas mostrada na LazyColumn.
     // mutableStateListOf: quando a lista muda, a tela se atualiza sozinha.
@@ -25,10 +31,13 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     // Campos do formulário (já começam com valores padrão)
     var title by mutableStateOf("")
-    var category by mutableStateOf("Pessoal")
+    var category by mutableStateOf("")
     var priority by mutableStateOf("Média")
     var deliveryDate by mutableStateOf("")
     var notes by mutableStateOf("")
+
+    // Opções do campo "Categoria": vêm da tabela de categorias (CRUD 3)
+    val categories = mutableStateListOf<String>()
 
     // Mensagem de erro do formulário (null = sem erro)
     var errorMessage by mutableStateOf<String?>(null)
@@ -54,6 +63,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun loadTask(taskId: Long) {
         if (formLoaded) return
         formLoaded = true
+
+        categories.clear()
+        categories.addAll(categoryDao.getAllByUser(sessionManager.getUserId()).map { it.name })
+        category = categories.firstOrNull() ?: "" // nova tarefa começa com a primeira categoria
 
         val task = if (taskId > 0) taskDao.getById(taskId) else null
         editingTask = task

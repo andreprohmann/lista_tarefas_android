@@ -5,9 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import com.example.mypersonalorganizerv2.data.CategoryDao
 import com.example.mypersonalorganizerv2.data.DatabaseHelper
 import com.example.mypersonalorganizerv2.data.SessionManager
 import com.example.mypersonalorganizerv2.data.UserDao
+import com.example.mypersonalorganizerv2.model.Category
 import com.example.mypersonalorganizerv2.model.User
 
 // VIEWMODEL de autenticação: cuida do LOGIN, do CADASTRO e do SAIR.
@@ -18,6 +20,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userDao = UserDao(DatabaseHelper(application)) // acesso à tabela de usuários
     private val sessionManager = SessionManager(application)  // controle de sessão
+    private val categoryDao = CategoryDao(DatabaseHelper(application)) // categorias iniciais do novo usuário
 
     // Campos digitados nas telas de login e cadastro.
     // mutableStateOf faz a tela se atualizar sozinha quando o valor muda.
@@ -85,6 +88,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         if (id == -1L) {
             errorMessage = "Não foi possível criar a conta."
             return false
+        }
+
+        // 3) Cria as categorias padrão do novo usuário (ele pode alterar depois)
+        listOf("Pessoal", "Trabalho", "Estudos", "Saúde", "Outros").forEach { name ->
+            categoryDao.insert(Category(userId = id, name = name))
         }
         return true
     }

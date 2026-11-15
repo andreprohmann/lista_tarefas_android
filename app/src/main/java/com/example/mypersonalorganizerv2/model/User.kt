@@ -10,5 +10,6 @@ data class User(
     val phone: String,         // telefone
     val birthDate: String,     // data de nascimento (texto, ex.: "10/05/2000")
     val address: String = "",  // endereço (preenchido na tela de perfil)
+    val photo: String = "",    // caminho da foto escolhida na galeria ("" = sem foto)
     val password: String       // senha usada no login
 )
