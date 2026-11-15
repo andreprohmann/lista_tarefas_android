@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mypersonalorganizerv2.model.Appointment
-import com.example.mypersonalorganizerv2.navigation.Screen
+import com.example.mypersonalorganizerv2.navigation.AppointmentList
 import com.example.mypersonalorganizerv2.ui.components.DeleteConfirmDialog
 import com.example.mypersonalorganizerv2.ui.components.EmptyState
 import com.example.mypersonalorganizerv2.ui.components.MainScaffold
@@ -29,7 +29,7 @@ import com.example.mypersonalorganizerv2.viewmodel.AppointmentViewModel
 // Funciona igual à lista de tarefas. Usa o MainScaffold, então TEM menu.
 @Composable
 fun AppointmentListScreen(
-    onNavigate: (String) -> Unit,          // navegação do menu
+    onNavigate: (Any) -> Unit,          // navegação do menu
     onLogout: () -> Unit,                  // botão Sair
     onAddAppointment: () -> Unit,          // botão "+" (novo compromisso)
     onEditAppointment: (Long) -> Unit,     // abrir um compromisso para editar
@@ -39,13 +39,13 @@ fun AppointmentListScreen(
     var appointmentToDelete by remember { mutableStateOf<Appointment?>(null) }
 
     // LaunchedEffect: sempre que a tela abre, busca os compromissos no banco
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.userId) {
         viewModel.loadAppointments()
     }
 
     MainScaffold(
         title = "Compromissos",
-        currentRoute = Screen.AppointmentList.route,
+        currentRoute = AppointmentList,
         onNavigate = onNavigate,
         onLogout = onLogout,
         // Botão redondo "+": cria um novo compromisso

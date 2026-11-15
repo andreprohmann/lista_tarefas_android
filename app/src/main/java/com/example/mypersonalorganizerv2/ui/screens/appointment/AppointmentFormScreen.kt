@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mypersonalorganizerv2.navigation.Screen
+import com.example.mypersonalorganizerv2.navigation.AppointmentList
 import com.example.mypersonalorganizerv2.ui.components.CustomTextField
 import com.example.mypersonalorganizerv2.ui.components.MainScaffold
 import com.example.mypersonalorganizerv2.ui.components.PrimaryButton
@@ -32,7 +32,7 @@ private val serviceTypes = listOf("Consulta", "Exame", "Reunião", "Aula", "Outr
 @Composable
 fun AppointmentFormScreen(
     appointmentId: Long,            // id recebido pela navegação
-    onNavigate: (String) -> Unit,
+    onNavigate: (Any) -> Unit,
     onLogout: () -> Unit,
     onSaved: () -> Unit,            // chamado depois de salvar (volta para a lista)
     viewModel: AppointmentViewModel = viewModel()
@@ -44,7 +44,7 @@ fun AppointmentFormScreen(
 
     MainScaffold(
         title = if (viewModel.editingAppointment != null) "Editar compromisso" else "Agendar compromisso",
-        currentRoute = Screen.AppointmentList.route,
+        currentRoute = AppointmentList,
         onNavigate = onNavigate,
         onLogout = onLogout
     ) { innerPadding ->

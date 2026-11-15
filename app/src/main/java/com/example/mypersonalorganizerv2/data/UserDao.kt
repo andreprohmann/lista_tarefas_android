@@ -21,6 +21,7 @@ class UserDao(private val dbHelper: DatabaseHelper) {
             put("phone", user.phone)
             put("birth_date", user.birthDate)
             put("address", user.address)
+            put("photo", user.photo)
             put("password", user.password)
         }
         return db.insert(DatabaseHelper.TABLE_USERS, null, values)
@@ -36,6 +37,7 @@ class UserDao(private val dbHelper: DatabaseHelper) {
             put("phone", user.phone)
             put("birth_date", user.birthDate)
             put("address", user.address)
+            put("photo", user.photo)
             put("password", user.password)
         }
         // "id = ?" diz QUAL usuário alterar. O "?" é trocado pelo valor do arrayOf.
@@ -90,6 +92,7 @@ class UserDao(private val dbHelper: DatabaseHelper) {
             phone = cursor.getString(cursor.getColumnIndexOrThrow("phone")) ?: "",          // "?: """ = se vier vazio do banco, usa texto vazio
             birthDate = cursor.getString(cursor.getColumnIndexOrThrow("birth_date")) ?: "",
             address = cursor.getString(cursor.getColumnIndexOrThrow("address")) ?: "",
+            photo = cursor.getString(cursor.getColumnIndexOrThrow("photo")) ?: "",
             password = cursor.getString(cursor.getColumnIndexOrThrow("password"))
         )
     }

@@ -18,6 +18,10 @@ class AppointmentViewModel(application: Application) : AndroidViewModel(applicat
     private val appointmentDao = AppointmentDao(DatabaseHelper(application)) // acesso à tabela de compromissos
     private val sessionManager = SessionManager(application)                // para saber quem está logado
 
+    // Id do usuário logado: as telas usam como chave do LaunchedEffect,
+    // pois os dados mostrados dependem de QUEM está logado.
+    val userId = sessionManager.getUserId()
+
     // Lista de compromissos mostrada na LazyColumn (a tela se atualiza sozinha quando muda)
     val appointments = mutableStateListOf<Appointment>()
 

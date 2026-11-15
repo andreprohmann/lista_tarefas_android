@@ -25,10 +25,12 @@ class DatabaseHelper(context: Context) :
                 phone TEXT,
                 birth_date TEXT,
                 address TEXT,
+                photo TEXT,
                 password TEXT NOT NULL
             )
             """.trimIndent()
         )
+        // "photo" guarda o caminho da foto escolhida na galeria (fica na pasta interna do app)
 
         // Tabela de TAREFAS (CRUD 1)
         // "user_id" guarda de quem é a tarefa, para cada usuário ver só as suas.
@@ -65,11 +67,44 @@ class DatabaseHelper(context: Context) :
             )
             """.trimIndent()
         )
+
+        // Tabela de CATEGORIAS (CRUD 3)
+        // As categorias aparecem no campo "Categoria" do formulário de tarefas.
+        db.execSQL(
+            """
+            CREATE TABLE $TABLE_CATEGORIES (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES $TABLE_USERS(id)
+            )
+            """.trimIndent()
+        )
+
+        // Tabela de CONTATOS (CRUD 4)
+        // "cep" é usado para buscar o endereço na API ViaCEP; "photo" vem da galeria.
+        db.execSQL(
+            """
+            CREATE TABLE $TABLE_CONTACTS (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                phone TEXT,
+                email TEXT,
+                cep TEXT,
+                address TEXT,
+                photo TEXT,
+                FOREIGN KEY (user_id) REFERENCES $TABLE_USERS(id)
+            )
+            """.trimIndent()
+        )
     }
 
     // onUpgrade roda quando aumentamos o DATABASE_VERSION.
     // Aqui, de forma simples, apagamos as tabelas antigas e criamos de novo.
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_CONTACTS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_CATEGORIES")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_APPOINTMENTS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TASKS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
@@ -79,11 +114,13 @@ class DatabaseHelper(context: Context) :
     // Constantes: nomes fixos usados em vários lugares do código.
     companion object {
         const val DATABASE_NAME = "personal_organizer.db" // nome do arquivo do banco no celular
-        const val DATABASE_VERSION = 1                    // versão do banco
+        const val DATABASE_VERSION = 2                    // versão do banco (2 = categorias, contatos e fotos)
 
         // Nomes das tabelas
         const val TABLE_USERS = "users"
         const val TABLE_TASKS = "tasks"
         const val TABLE_APPOINTMENTS = "appointments"
+        const val TABLE_CATEGORIES = "categories"
+        const val TABLE_CONTACTS = "contacts"
     }
 }

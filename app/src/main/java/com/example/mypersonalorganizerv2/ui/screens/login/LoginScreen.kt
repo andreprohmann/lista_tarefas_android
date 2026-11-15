@@ -41,7 +41,7 @@ fun LoginScreen(
 
     // LaunchedEffect = "assim que a tela abrir, faça isso".
     // Se já existe uma sessão salva (usuário não clicou em Sair), pula direto para o app.
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.isLoggedIn()) {
         if (viewModel.isLoggedIn()) {
             onLoginSuccess()
         }

@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mypersonalorganizerv2.navigation.Screen
+import com.example.mypersonalorganizerv2.navigation.TaskList
 import com.example.mypersonalorganizerv2.ui.components.CustomTextField
 import com.example.mypersonalorganizerv2.ui.components.MainScaffold
 import com.example.mypersonalorganizerv2.ui.components.PrimaryButton
@@ -21,16 +21,13 @@ import com.example.mypersonalorganizerv2.ui.components.SelectField
 import com.example.mypersonalorganizerv2.ui.theme.PrimaryBlue
 import com.example.mypersonalorganizerv2.viewmodel.TaskViewModel
 
-// Opções do campo "Categoria"
-private val categories = listOf("Pessoal", "Trabalho", "Estudos", "Saúde", "Outros")
-
 // TELA DE FORMULÁRIO DE TAREFA (CRUD 1: Criar e Alterar).
 // A MESMA tela serve para criar e para editar:
 // taskId = -1 -> nova tarefa | taskId = número real -> editar essa tarefa
 @Composable
 fun TaskFormScreen(
     taskId: Long,                   // id recebido pela navegação
-    onNavigate: (String) -> Unit,
+    onNavigate: (Any) -> Unit,
     onLogout: () -> Unit,
     onSaved: () -> Unit,            // chamado depois de salvar (volta para a lista)
     viewModel: TaskViewModel = viewModel()
@@ -44,7 +41,7 @@ fun TaskFormScreen(
     MainScaffold(
         // O título muda conforme o modo: editando ou criando
         title = if (viewModel.editingTask != null) "Editar tarefa" else "Nova tarefa",
-        currentRoute = Screen.TaskList.route,
+        currentRoute = TaskList,
         onNavigate = onNavigate,
         onLogout = onLogout
     ) { innerPadding ->
@@ -66,8 +63,8 @@ fun TaskFormScreen(
             Spacer(modifier = Modifier.height(16.dp))
             SelectField(
                 label = "Categoria",
-                selected = viewModel.category,
-                options = categories,
+                selected = viewModel.category.ifBlank { "Sem categoria (cadastre no menu)" },
+                options = viewModel.categories, // categorias cadastradas pelo usuário
                 onSelect = { viewModel.category = it }
             )
             Spacer(modifier = Modifier.height(16.dp))
